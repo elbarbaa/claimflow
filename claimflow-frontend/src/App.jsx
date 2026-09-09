@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { ShieldCheck } from "lucide-react";
 
 const API_URL = "http://localhost:8080";
 
@@ -23,6 +24,9 @@ function App() {
 
   const [claims, setClaims] = useState([]);
   const [submittedClaim, setSubmittedClaim] = useState(null);
+
+const [editingClaimId, setEditingClaimId] = useState(null);
+const [selectedStatus, setSelectedStatus] = useState("");
 
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -180,6 +184,10 @@ function App() {
           claim.id === updatedClaim.id ? updatedClaim : claim
         )
       );
+
+      setEditingClaimId(null);
+      setSelectedStatus("");
+
     } catch (error) {
       setError(error.message);
     }
@@ -193,8 +201,6 @@ function App() {
         return "bg-yellow-100 text-yellow-700 border border-yellow-200";
       case "REJECTED":
         return "bg-red-100 text-red-700 border border-red-200";
-      case "SUBMITTED":
-        return "bg-blue-100 text-blue-700 border border-blue-200";
       default:
         return "bg-slate-100 text-slate-700 border border-slate-200";
     }
@@ -300,10 +306,15 @@ function App() {
     <div className="min-h-screen bg-slate-100">
       <header className="bg-white border-b">
         <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
+          
+          
           <div>
-            <h1 className="text-2xl font-bold text-slate-900">
-              ClaimFlow
-            </h1>
+            <div className="flex items-center gap-2">
+              <ShieldCheck className="w-7 h-7 text-blue-600" />
+              <h1 className="text-2xl font-bold text-slate-900">
+                ClaimFlow
+              </h1>
+            </div>
 
             <p className="text-sm text-slate-500">
               Insurance Claims Processing
@@ -495,34 +506,57 @@ function App() {
                     </div>
                   </div>
 
-                  {role === "MANAGER" &&
-                    claim.status === "UNDER_REVIEW" && (
-                      <div className="flex gap-3 mt-4 pt-4 border-t">
-                        <button
-                          onClick={() =>
-                            updateClaimStatus(
-                              claim.id,
-                              "APPROVED"
-                            )
-                          }
-                          className="bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-green-700"
-                        >
-                          Approve
-                        </button>
+                  
+                  {role === "MANAGER" && (
+                    <div className="mt-4 pt-4 border-t">
+                      {editingClaimId === claim.id ? (
+                        <div className="flex flex-col sm:flex-row gap-3">
+                          <select
+                            value={selectedStatus}
+                            onChange={(event) => setSelectedStatus(event.target.value)}
+                            className="border border-slate-300 rounded-lg px-3 py-2 text-sm"
+                          >
+                            <option value="">Select status</option>
+                            <option value="UNDER_REVIEW">Under Review</option>
+                            <option value="APPROVED">Approved</option>
+                            <option value="REJECTED">Rejected</option>
+                          </select>
 
+                          <button
+                            onClick={() =>
+                              updateClaimStatus(claim.id, selectedStatus)
+                            }
+                            disabled={!selectedStatus}
+                            className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50"
+                          >
+                            Save
+                          </button>
+
+                          <button
+                            onClick={() => {
+                              setEditingClaimId(null);
+                              setSelectedStatus("");
+                            }}
+                            className="border border-slate-300 px-4 py-2 rounded-lg text-sm font-medium hover:bg-slate-50"
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      ) : (
                         <button
-                          onClick={() =>
-                            updateClaimStatus(
-                              claim.id,
-                              "REJECTED"
-                            )
-                          }
-                          className="bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-red-700"
+                          onClick={() => {
+                            setEditingClaimId(claim.id);
+                            setSelectedStatus(claim.status);
+                          }}
+                          className="border border-slate-300 px-4 py-2 rounded-lg text-sm font-medium hover:bg-slate-50"
                         >
-                          Reject
+                          Edit Status
                         </button>
-                      </div>
-                    )}
+                      )}
+                    </div>
+                  )}
+
+
                 </div>
               ))
             )}
