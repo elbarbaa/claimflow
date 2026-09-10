@@ -605,6 +605,7 @@ Potential next steps include:
 - Add filtering to the claims dashboard.
 - Add claim status history and auditing.
 - Add production deployment configuration.
+- Deploy online for real user access
 
 ---
 
